@@ -1,11 +1,10 @@
 import { ExtensionType } from '../../../extensions/Extensions';
 import { type Filter } from '../../../filters/Filter';
-import { TexturePool } from '../../../rendering/renderers/shared/texture/TexturePool';
 import { TextureStyle } from '../../../rendering/renderers/shared/texture/TextureStyle';
 import { deprecation } from '../../../utils/logging/deprecation';
 import { type CanvasTextOptions, type Text } from '../Text';
 import { TextStyle } from '../TextStyle';
-import { getPo2TextureFromSource } from '../utils/getPo2TextureFromSource';
+import { getPo2TextureFromSource, returnPo2Texture } from '../utils/getPo2TextureFromSource';
 import { CanvasTextGenerator } from './CanvasTextGenerator';
 
 import type { System } from '../../../rendering/renderers/shared/system/System';
@@ -150,7 +149,7 @@ export class CanvasTextSystem implements System
         source.uploadMethodId = 'unknown';
         source.alphaMode = 'no-premultiply-alpha';
 
-        TexturePool.returnTexture(texture, true);
+        returnPo2Texture(texture, true);
     }
 
     /**

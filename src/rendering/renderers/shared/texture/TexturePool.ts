@@ -183,8 +183,10 @@ export class TexturePoolClass
 
 /**
  * The default texture pool instance.
+ * Explicitly disables mipmaps for render textures used by filters, as mipmaps on render textures
+ * cause sampling issues because the mipmap levels are never populated with valid data.
  * @category rendering
  * @advanced
  */
-export const TexturePool = new TexturePoolClass();
+export const TexturePool = new TexturePoolClass({ autoGenerateMipmaps: false });
 GlobalResourceRegistry.register(TexturePool);

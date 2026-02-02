@@ -1,13 +1,12 @@
 import { type ImageLike } from '../../environment/ImageLike';
 import { ExtensionType } from '../../extensions/Extensions';
 import { type CanvasAndContext, CanvasPool } from '../../rendering/renderers/shared/texture/CanvasPool';
-import { TexturePool } from '../../rendering/renderers/shared/texture/TexturePool';
 import { type TextureStyle } from '../../rendering/renderers/shared/texture/TextureStyle';
 import { type Renderer, RendererType } from '../../rendering/renderers/types';
 import { isSafari } from '../../utils/browser/isSafari';
 import { warn } from '../../utils/logging/warn';
 import { BigPool } from '../../utils/pool/PoolGroup';
-import { getPo2TextureFromSource } from '../text/utils/getPo2TextureFromSource';
+import { getPo2TextureFromSource, returnPo2Texture } from '../text/utils/getPo2TextureFromSource';
 import { HTMLTextRenderData } from './HTMLTextRenderData';
 import { type HTMLTextStyle } from './HTMLTextStyle';
 import { extractFontFamilies } from './utils/extractFontFamilies';
@@ -236,7 +235,7 @@ export class HTMLTextSystem implements System
 
     private _cleanUp(texture: Texture)
     {
-        TexturePool.returnTexture(texture, true);
+        returnPo2Texture(texture, true);
         texture.source.resource = null;
         texture.source.uploadMethodId = 'unknown';
     }

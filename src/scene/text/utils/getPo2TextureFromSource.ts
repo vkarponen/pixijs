@@ -1,11 +1,44 @@
 import { type ImageLike } from '../../../environment/ImageLike';
-import { TexturePool } from '../../../rendering/renderers/shared/texture/TexturePool';
+import { TextureSource } from '../../../rendering/renderers/shared/texture/sources/TextureSource';
+import { TexturePoolClass } from '../../../rendering/renderers/shared/texture/TexturePool';
 import { Bounds } from '../../container/bounds/Bounds';
 
 import type { ICanvas } from '../../../environment/canvas/ICanvas';
 import type { Texture } from '../../../rendering/renderers/shared/texture/Texture';
 
 const tempBounds = new Bounds();
+
+// Separate texture pool for text rendering that respects the global mipmap setting
+// This prevents text textures (with mipmaps) from being mixed with filter textures (without mipmaps)
+let textTexturePool: TexturePoolClass | null = null;
+
+function getTextTexturePool(): TexturePoolClass
+{
+    const globalMipmapSetting = TextureSource.defaultOptions.autoGenerateMipmaps;
+
+    if (!textTexturePool || textTexturePool.textureOptions.autoGenerateMipmaps !== globalMipmapSetting)
+    {
+        // Create or recreate the pool when the global mipmap setting changes
+        textTexturePool = new TexturePoolClass({
+            autoGenerateMipmaps: globalMipmapSetting,
+        });
+    }
+
+    return textTexturePool;
+}
+
+/**
+ * Returns a texture to the text texture pool.
+ * @param texture - The texture to return to the pool
+ * @param resetStyle - Whether to reset the style
+ * @internal
+ */
+export function returnPo2Texture(texture: Texture, resetStyle = false): void
+{
+    const pool = getTextTexturePool();
+
+    pool.returnTexture(texture, resetStyle);
+}
 
 /**
  * Takes an image and creates a texture from it, using a power of 2 texture from the texture pool.
@@ -32,7 +65,11 @@ export function getPo2TextureFromSource(
     bounds.maxX = (image.width / resolution) | 0;
     bounds.maxY = (image.height / resolution) | 0;
 
-    const texture = TexturePool.getOptimalTexture(
+    // Use a separate texture pool for text that respects the global mipmap setting
+    // This prevents text textures (potentially with mipmaps) from being mixed with
+    // filter textures (which should never have mipmaps)
+    const pool = getTextTexturePool();
+    const texture = pool.getOptimalTexture(
         bounds.width,
         bounds.height,
         resolution,
